@@ -1,6 +1,6 @@
 // かな → ヘボン式ローマ字変換(REQ-001)。
 // 実装は3段構成(IMPLEMENTATION_GUIDE 3章): (1) トークナイズ(拗音2文字を最長一致で優先)
-// (2) 表引き (3) 後処理(促音・撥音・長音 — 第2・3弾で実装)。
+// (2) 表引き (3) 後処理(促音・撥音は実装済み、長音は第3弾)。
 // 本モジュールは共有対象(NFR-004): types.ts 以外を import しない。純粋関数のみ。
 
 import { type Result, err, ok } from "./types";
@@ -8,7 +8,7 @@ import { type Result, err, ok } from "./types";
 /**
  * 変換表(データ)。規則(促音・撥音・長音)はロジック側に置き、表は音節のみを持つ。
  * 表は「かな(ひらがな正規形)→ ローマ字音節」。カタカナは入力境界でひらがなへ正規化する。
- * っ / ん / ー は音節でないため表に載せない(後処理の担当。第1弾では unconvertible)。
+ * っ / ん / ー は音節でないため表に載せない(っ・ん は後処理、ー は第3弾)。
  */
 const SYLLABLES: Record<string, string> = {
   // 基本
@@ -123,8 +123,52 @@ const SYLLABLES: Record<string, string> = {
 const kataToHira = (s: string): string =>
   s.replace(/[\u30a1-\u30f6]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60));
 
-/** 音節トークン。index は元入力内の位置(エラー報告・後処理の位置参照用)。 */
-type Syllable = { romaji: string; index: number };
+/** トークン。音節のほか、後処理対象(促音・撥音)を区別する。index は元入力内の位置。 */
+type Token =
+  | { kind: "syllable"; romaji: string; index: number }
+  | { kind: "sokuon"; index: number }
+  | { kind: "hatsuon"; index: number };
+
+const VOWELS = new Set(["a", "i", "u", "e", "o"]);
+
+/**
+ * 後処理: 促音・撥音をローマ字列に解決する(規則はロジック、表はデータの原則)。
+ * - 促音: 次音節の頭子音を重ねる。次が ch なら t(こっち→kotchi)。次が音節でなければ unconvertible
+ * - 撥音: 次音節の頭が b/m/p なら m(伝統ヘボン式)、母音・y なら n'、それ以外・語末は n
+ */
+function resolveTokens(tokens: Token[], original: string): Result<string> {
+  const parts: string[] = [];
+  for (let t = 0; t < tokens.length; t++) {
+    const cur = tokens[t];
+    if (cur === undefined) continue;
+    if (cur.kind === "syllable") {
+      parts.push(cur.romaji);
+      continue;
+    }
+    const next = tokens[t + 1];
+    const nextHead = next !== undefined && next.kind === "syllable" ? next.romaji.charAt(0) : null;
+    if (cur.kind === "sokuon") {
+      if (nextHead === null || VOWELS.has(nextHead)) {
+        return err({
+          code: "unconvertible",
+          index: cur.index,
+          char: original.charAt(cur.index),
+        });
+      }
+      parts.push(nextHead === "c" ? "t" : nextHead);
+      continue;
+    }
+    // hatsuon
+    if (nextHead !== null && (nextHead === "b" || nextHead === "m" || nextHead === "p")) {
+      parts.push("m");
+    } else if (nextHead !== null && (VOWELS.has(nextHead) || nextHead === "y")) {
+      parts.push("n'");
+    } else {
+      parts.push("n");
+    }
+  }
+  return ok(parts.join(""));
+}
 
 /**
  * かな文字列をヘボン式ローマ字に変換する。
@@ -134,23 +178,33 @@ type Syllable = { romaji: string; index: number };
  */
 export function toHepburn(kana: string): Result<string> {
   const src = kataToHira(kana.normalize("NFC"));
-  const syllables: Syllable[] = [];
+  const tokens: Token[] = [];
   let i = 0;
   while (i < src.length) {
     const two = src.slice(i, i + 2);
     if (two.length === 2 && SYLLABLES[two] !== undefined) {
-      syllables.push({ romaji: SYLLABLES[two], index: i });
+      tokens.push({ kind: "syllable", romaji: SYLLABLES[two], index: i });
       i += 2;
       continue;
     }
     const one = src.charAt(i);
+    if (one === "っ") {
+      tokens.push({ kind: "sokuon", index: i });
+      i += 1;
+      continue;
+    }
+    if (one === "ん") {
+      tokens.push({ kind: "hatsuon", index: i });
+      i += 1;
+      continue;
+    }
     const hit = SYLLABLES[one];
     if (hit !== undefined) {
-      syllables.push({ romaji: hit, index: i });
+      tokens.push({ kind: "syllable", romaji: hit, index: i });
       i += 1;
       continue;
     }
     return err({ code: "unconvertible", index: i, char: kana.charAt(i) });
   }
-  return ok(syllables.map((s) => s.romaji).join(""));
+  return resolveTokens(tokens, kana);
 }
