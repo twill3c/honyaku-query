@@ -28,12 +28,12 @@
 
 | TC-ID | 階層 | 観点 | 期待結果 | 状態 |
 |---|---|---|---|---|
-| TC-011 | unit | 長音展開の優先順 | sōseki → [sōseki, soseki, souseki](oh は語末のみなので対象外) | 未作成 |
-| TC-012 | unit | 語末 oh 形 | satō → 展開に satoh を含む(語中の ō には oh を作らない) | 未作成 |
-| TC-013 | unit | 姓名順・イニシャル | (natsume, sōseki) → "Sōseki Natsume" 主、"Natsume Sōseki" 副、"S. Natsume" 末尾 | 未作成 |
-| TC-014 | unit | 重複除去・上限12 | 長音2箇所×姓名順で膨らむ入力(jun'ichirō tanizaki 等)でも 12 件以下+切り捨てフラグ | 未作成 |
-| TC-015 | unit | 決定性 | 同一入力2回で同一の順序列 | 未作成 |
-| TC-016 | unit | 作品名モード | 長音展開のみ適用(姓名順・イニシャルなし) | 未作成 |
+| TC-011 | unit | 長音展開の優先順 | sōseki → [sōseki, soseki, souseki](oh は語末のみなので対象外) | 済 |
+| TC-012 | unit | 語末 oh 形 | satō → 展開に satoh を含む(語中の ō には oh を作らない) | 済 |
+| TC-013 | unit | 姓名順・イニシャル | (natsume, sōseki) → "Sōseki Natsume" 主、"Natsume Sōseki" 副、"S. Natsume" 末尾 | 済 |
+| TC-014 | unit | 重複除去・上限12 | 長音2箇所×姓名順で膨らむ入力(jun'ichirō tanizaki 等)でも 12 件以下+切り捨てフラグ | 済 |
+| TC-015 | unit | 決定性 | 同一入力2回で同一の順序列 | 済 |
+| TC-016 | unit | 作品名モード | 長音展開のみ適用(姓名順・イニシャルなし) | 済 |
 
 ### REQ-003: ターゲットマスタ・URL 生成
 
