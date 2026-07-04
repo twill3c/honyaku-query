@@ -14,15 +14,15 @@
 
 | TC-ID | 階層 | 観点 | 期待結果 | 状態 |
 |---|---|---|---|---|
-| TC-001 | unit | 五十音基本・ひらがな/カタカナ同一視 | なつめ = ナツメ → natsume | 未作成 |
-| TC-002 | unit | 拗音 | しゃ→sha / ちゅ→chu / じょ→jo / りょ→ryo / ぎゃ→gya | 未作成 |
-| TC-003 | unit | 促音 | きっぷ→kippu / ざっし→zasshi / **こっち→kotchi**(ch の前は t) | 未作成 |
-| TC-004 | unit | 撥音の m 化 | しんぶん→shimbun / さんぽ→sampo / ぐんま→gumma | 未作成 |
-| TC-005 | unit | 撥音のアポストロフィ | しんいち→shin'ichi / じゅんや→jun'ya(ん+母音/や行)。しんじ→shinji(不要) | 未作成 |
-| TC-006 | unit | 長音マクロン | そうせき→sōseki / おおえ→ōe / ゆうこ→yūko / **えいご→eigo(ei は非長音)** | 未作成 |
-| TC-007 | unit | カタカナ長音符 | コーヒー→kōhī | 未作成 |
-| TC-008 | unit | 変換不能 | 漢字混じり「夏め」→ `unconvertible` + 位置 0 | 未作成 |
-| TC-009 | unit | 黄金テスト(実在名) | なつめそうせき→natsume sōseki / もりおうがい→mori ōgai / たにざきじゅんいちろう→tanizaki jun'ichirō / かわばたやすなり→kawabata yasunari | 未作成 |
+| TC-001 | unit | 五十音基本・ひらがな/カタカナ同一視 | なつめ = ナツメ → natsume | 済 |
+| TC-002 | unit | 拗音 | しゃ→sha / ちゅ→chu / じょ→jo / りょ→ryo / ぎゃ→gya | 済 |
+| TC-003 | unit | 促音 | きっぷ→kippu / ざっし→zasshi / **こっち→kotchi**(ch の前は t) | 済 |
+| TC-004 | unit | 撥音の m 化 | しんぶん→shimbun / さんぽ→sampo / ぐんま→gumma | 済 |
+| TC-005 | unit | 撥音のアポストロフィ | しんいち→shin'ichi / じゅんや→jun'ya(ん+母音/や行)。しんじ→shinji(不要) | 済 |
+| TC-006 | unit | 長音マクロン | そうせき→sōseki / おおえ→ōe / ゆうこ→yūko / **えいご→eigo(ei は非長音)** | 済 |
+| TC-007 | unit | カタカナ長音符 | コーヒー→kōhī | 済 |
+| TC-008 | unit | 変換不能 | 漢字混じり「夏め」→ `unconvertible` + 位置 0 | 済 |
+| TC-009 | unit | 黄金テスト(実在名) | なつめそうせき→natsume sōseki / もりおうがい→mori ōgai / たにざきじゅんいちろう→tanizaki jun'ichirō / かわばたやすなり→kawabata yasunari | 済 |
 
 ### REQ-002: バリアント展開
 
