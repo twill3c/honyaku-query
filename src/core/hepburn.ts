@@ -1,6 +1,6 @@
 // かな → ヘボン式ローマ字変換(REQ-001)。
 // 実装は3段構成(IMPLEMENTATION_GUIDE 3章): (1) トークナイズ(拗音2文字を最長一致で優先)
-// (2) 表引き (3) 後処理(促音・撥音は実装済み、長音は第3弾)。
+// (2) 表引き (3) 後処理(促音・撥音・長音)。
 // 本モジュールは共有対象(NFR-004): types.ts 以外を import しない。純粋関数のみ。
 
 import { type Result, err, ok } from "./types";
@@ -8,7 +8,7 @@ import { type Result, err, ok } from "./types";
 /**
  * 変換表(データ)。規則(促音・撥音・長音)はロジック側に置き、表は音節のみを持つ。
  * 表は「かな(ひらがな正規形)→ ローマ字音節」。カタカナは入力境界でひらがなへ正規化する。
- * っ / ん / ー は音節でないため表に載せない(っ・ん は後処理、ー は第3弾)。
+ * っ / ん / ー は音節でないため表に載せない(すべて後処理の担当)。
  */
 const SYLLABLES: Record<string, string> = {
   // 基本
@@ -127,14 +127,35 @@ const kataToHira = (s: string): string =>
 type Token =
   | { kind: "syllable"; romaji: string; index: number }
   | { kind: "sokuon"; index: number }
-  | { kind: "hatsuon"; index: number };
+  | { kind: "hatsuon"; index: number }
+  | { kind: "choonpu"; index: number };
 
 const VOWELS = new Set(["a", "i", "u", "e", "o"]);
+const MACRON: Record<string, string> = {
+  a: "\u0101",
+  i: "\u012b",
+  u: "\u016b",
+  e: "\u0113",
+  o: "\u014d",
+};
+
+/** 直前パート末尾の母音をマクロン化して置換する。母音で終わらなければ null。 */
+function macronizeLast(parts: string[]): boolean {
+  const last = parts[parts.length - 1];
+  if (last === undefined || last.length === 0) return false;
+  const tail = last.charAt(last.length - 1);
+  const m = MACRON[tail];
+  if (m === undefined) return false;
+  parts[parts.length - 1] = last.slice(0, -1) + m;
+  return true;
+}
 
 /**
  * 後処理: 促音・撥音をローマ字列に解決する(規則はロジック、表はデータの原則)。
  * - 促音: 次音節の頭子音を重ねる。次が ch なら t(こっち→kotchi)。次が音節でなければ unconvertible
  * - 撥音: 次音節の頭が b/m/p なら m(伝統ヘボン式)、母音・y なら n'、それ以外・語末は n
+ * - 長音: 直前音節が o で終わり次が単独 う/お → ō、u で終わり次が単独 う → ū(えい は非長音 — SPEC 3章)。
+ *   長音符 ー は直前パート末尾の母音をマクロン化(母音がなければ unconvertible)
  */
 function resolveTokens(tokens: Token[], original: string): Result<string> {
   const parts: string[] = [];
@@ -142,7 +163,32 @@ function resolveTokens(tokens: Token[], original: string): Result<string> {
     const cur = tokens[t];
     if (cur === undefined) continue;
     if (cur.kind === "syllable") {
+      // 長音融合: 単独母音 う(u)/お(o) が直前音節の末尾母音と結合する場合
+      const prev = tokens[t - 1];
+      const prevIsSyllable = prev !== undefined && prev.kind === "syllable";
+      const lastPart = parts[parts.length - 1];
+      const lastTail =
+        prevIsSyllable && lastPart !== undefined && lastPart.length > 0
+          ? lastPart.charAt(lastPart.length - 1)
+          : null;
+      if (
+        (cur.romaji === "u" && (lastTail === "o" || lastTail === "u")) ||
+        (cur.romaji === "o" && lastTail === "o")
+      ) {
+        macronizeLast(parts);
+        continue;
+      }
       parts.push(cur.romaji);
+      continue;
+    }
+    if (cur.kind === "choonpu") {
+      if (!macronizeLast(parts)) {
+        return err({
+          code: "unconvertible",
+          index: cur.index,
+          char: original.charAt(cur.index),
+        });
+      }
       continue;
     }
     const next = tokens[t + 1];
@@ -195,6 +241,11 @@ export function toHepburn(kana: string): Result<string> {
     }
     if (one === "ん") {
       tokens.push({ kind: "hatsuon", index: i });
+      i += 1;
+      continue;
+    }
+    if (one === "ー") {
+      tokens.push({ kind: "choonpu", index: i });
       i += 1;
       continue;
     }
