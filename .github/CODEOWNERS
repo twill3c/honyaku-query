@@ -1,0 +1,8 @@
+# すべての変更はリポジトリオーナーのレビューを必須とする
+* @twill3c
+
+# ハーネス(プロセス定義)の変更は特に慎重に
+/AGENTS.md   @twill3c
+/CLAUDE.md   @twill3c
+/SPEC.md     @twill3c
+/.github/    @twill3c

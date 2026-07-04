@@ -1,0 +1,42 @@
+name: Auto PR
+
+# 作業ブランチが push されたとき、対応する PR がまだ無ければ自動で Draft PR を作成する。
+# 原則はエージェント自身が `gh pr create --fill` で説明付き PR を作る(AGENTS.md 参照)。
+# このワークフローは「PR 作成を忘れた/中断した」場合の保険。
+
+on:
+  push:
+    branches:
+      - 'feat/**'
+      - 'fix/**'
+      - 'chore/**'
+      - 'docs/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create draft PR if none exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          existing=$(gh pr list --head "$BRANCH" --json number --jq 'length')
+          if [ "$existing" -eq 0 ]; then
+            gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --draft \
+              --title "[auto] ${BRANCH}" \
+              --body "$(printf '自動作成された Draft PR です。\n\n- [ ] REQ-ID / TC-ID を記入\n- [ ] pytest 結果を貼付\n- [ ] STATE.md 更新確認\n\n詳細は PULL_REQUEST_TEMPLATE を参照してください。')"
+          else
+            echo "PR already exists for $BRANCH — skipping."
+          fi
