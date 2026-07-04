@@ -30,3 +30,15 @@
 
 | # | ブランチ / REQ | TC | Red→Green往復 | 人間介入 | 差分行数 | テスト数 | 検証 | メモ |
 |---|---|---|---|---|---|---|---|---|
+| 1 | feat/REQ-001-hepburn(1/3) | TC-001, 002, 008 | 3 | なし | +228 | 7 / 8 | test・lint・tsc ✓ | Red 段階でテスト自身にスコープ外文字(ん)が混入→修正。**「Red のテストは当該ループの規則だけを使う」を規律としてスキルへ還流候補**。tsc の noUncheckedIndexedAccess 対応1回 |
+| 2 | feat/REQ-001-hepburn(2/3) | TC-003, 004, 005 | 1 | 撥音既定を仮決定(伝統式 shimbun。Open Question を AGENTS 9章に従い仮決定で進行・本欄で明示) | +108 −8 | 6 / 14 | test・lint・tsc ✓ | 一発 Green。トークン種別(syllable/sokuon/hatsuon)導入 |
+| 3 | feat/REQ-001-hepburn(3/3) | TC-006, 007, 009 + 周辺文字 | 1 | TC-009 の「なつめそうせき→natsume sōseki」をフィールド対と解釈(仮決定・テストコメントに明記) | +131 −13 | 7 / 21 | test・lint・tsc・**coverage 98.2%** ✓ | 一発 Green。REQ-001 完了・状態列更新 |
+| 4 | feat/REQ-002-variants | TC-011〜016 | 2 | なし | +250 −7 | 9 / 30 | test・lint・tsc・**coverage 98.0%** ✓ | テスト側の型誤り(Variant を文字列扱い)修正1回。REQ-002 完了 |
+
+## 第1回実行のサマリ(2026-07-03)
+
+- **4ループ / 2 REQ 完了 / テスト30本 / core カバレッジ 98%**(NFR-001 基準 90% を大きく超過)
+- Red→Green 往復: 平均 1.75(一発 Green 2回)。失敗4回のうち**実装バグ 0・テスト側の記述ミス 2・型設定対応 1・モジュール不在(Red確認)1** — 足場の SPEC/TC が実装を強く拘束し、実装側の手戻りが発生しなかった
+- 人間介入 2 件はいずれも「仕様解釈の仮決定」で、AGENTS 9章(仮決定+明示)のフロー通りに処理できた
+- 逸脱: GitHub 不可(ローカル git 代替)、REQ-001 の 3PR 分割計画は 3 ループ 1 マージに変更
+- **vendor 本家として成立**: hepburn/variants が実装済みとなり、6 消費者(honyaku-atlas, prize-atlas, kaigaidai-query, eigajin-query, kaigai-joei-query ほか)の vendor 取り込みが机上から実行可能になった
