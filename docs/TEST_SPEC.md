@@ -39,10 +39,10 @@
 
 | TC-ID | 階層 | 観点 | 期待結果 | 状態 |
 |---|---|---|---|---|
-| TC-021 | unit | マスタ検証 | 10件以上・id 一意・urlTemplate が https かつ {q} を含む | 未作成 |
-| TC-022 | unit | パーセントエンコード | "Sōseki Natsume" → "S%C5%8Dseki%20Natsume"(percent方式)/ "+" 連結(plus方式) | 未作成 |
-| TC-023 | unit | アポストロフィ | "jun'ichirō" のエンコードが RFC 3986 準拠 | 未作成 |
-| TC-024 | unit | verified_at 鮮度 | 366日前は要確認フラグ(today 注入) | 未作成 |
+| TC-021 | unit | マスタ検証 | 10件以上・id 一意・urlTemplate が https かつ {q} を含む | 済 |
+| TC-022 | unit | パーセントエンコード | "Sōseki Natsume" → "S%C5%8Dseki%20Natsume"(percent方式)/ "+" 連結(plus方式) | 済 |
+| TC-023 | unit | アポストロフィ | "jun'ichirō" のエンコードが RFC 3986 準拠 | 済 |
+| TC-024 | unit | verified_at 鮮度 | 366日前は要確認フラグ(today 注入) | 済 |
 
 ### REQ-005 / REQ-006: フィルタ・共有
 
