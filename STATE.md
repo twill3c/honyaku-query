@@ -4,23 +4,24 @@
 
 ## Current Phase
 
-Phase 1 — 共有モジュール(REQ-001/002)完了。次はリンク生成(REQ-003)→ 最小 UI(REQ-004)→ 初回デプロイ
+Phase 1 — 共有モジュール(REQ-001/002)+ リンク生成(REQ-003)完了。次は最小 UI(REQ-004)→ 初回デプロイ
 
 ## Now(現在着手中)
 
-- なし(次ループで REQ-003 に着手)
+- なし(次ループで REQ-004 UI に着手)
 
 ## Next Actions(次にやること・計画メモ)
 
 - [x] REQ-001: `src/core/hepburn.ts` — 3ループで完了(LOOP_LOG #1〜3)
 - [x] REQ-002: `src/core/variants.ts` — 1ループで完了(LOOP_LOG #4)
-- [ ] REQ-003: `src/core/targets.ts` + `urlBuild.ts`(TC-021〜024)
+- [x] REQ-003: `src/core/targets.ts` + `urlBuild.ts` — 1ループで完了(LOOP_LOG #5、TC-021〜024)
 - [ ] REQ-004 UI → Vercel 初回デプロイ → REQ-005 / 006 / 007
 
 ## Done(完了ログ)
 
 | 日付 | REQ/TC | 内容 | PR |
 |---|---|---|---|
+| 2026-07-15 | REQ-003 / TC-021〜024 | targets + urlBuild 完了(core 99.4% / 全体 98.6%) | feat/REQ-003-targets-urlbuild |
 | 2026-07-03 | REQ-002 / TC-011〜016 | variants 完了(coverage 98.0%) | ローカルマージ fc37dcb |
 | 2026-07-03 | REQ-001 / TC-001〜009 | hepburn 完了(coverage 98.2%) | ローカルマージ efcf45d |
 | 2026-07-03 | - | git 初期化・ループ台帳形式定義(docs/LOOP_LOG.md) | 153a31e |
@@ -28,12 +29,15 @@ Phase 1 — 共有モジュール(REQ-001/002)完了。次はリンク生成(REQ
 
 ## Blockers(障害・待ち)
 
-- 検索ターゲット10件の URL テンプレート確認(各サイトの検索クエリパラメータ形式)は人間が実ブラウザで確認して targets.ts に投入
+- 検索ターゲット12件の URL テンプレートは REQ-003 で**仮投入済み**(各サイト検索仕様に基づく)。人間の実ブラウザ確認 → 差し替え・verifiedAt 更新が残タスク(構造・エンコード方式・検証関数・鮮度判定は確定)。特に jpf-jltrans / bnf / dnb は要確認
 
 ## Decisions(決定ログ)
 
 | 日付 | 決定 | 理由 / 代替案 |
 |---|---|---|
+| 2026-07-15 | REQ-003 の URL テンプレートを仮投入して実装を進行(人間の実ブラウザ確認待ち) | AGENTS 9章に従い影響小の仮決定。URL は差し替え可能なデータで構造・検証には影響しない。テンプレは data として targets.ts に集約し、規則(エンコード・検証・鮮度)はロジック側 |
+| 2026-07-15 | RFC 3986 準拠エンコードを自前実装(encodeURIComponent + `!'()*` 追加符号化) | TC-023 が `'`→`%27` を要求。encodeURIComponent は sub-delims を素通しするため不足。plus 方式は %20→+ 置換で対応 |
+| 2026-07-15 | 鮮度判定 `isStale(target, today)` は today を注入 | core は Date.now() 禁止(AGENTS 5章)。verifiedAt は UTC 深夜として解釈し 365 日超で stale |
 | 2026-07-03 | 撥音の既定=伝統ヘボン式(shimbun)で仮決定・実装 | Open Question を AGENTS 9章に従い仮決定で進行(修正式 n 形は REQ-002 の将来規則で吸収可能な設計)。人間の最終確認は継続 |
 | 2026-07-03 | TC-009 はフィールド(姓/名)単位の変換対と解釈 | toHepburn は1フィールド単位の API(UI の入力形に対応)。TEST_SPEC の表記を解釈しテストコメントに明記 |
 | 2026-07-03 | REQ-001 は 3 ループ 1 マージ(3PR 分割計画から変更) | ローカル git 運用での簡素化。ループ粒度は計画どおり3分割を維持(台帳参照) |
@@ -46,5 +50,5 @@ Phase 1 — 共有モジュール(REQ-001/002)完了。次はリンク生成(REQ
 ## Open Questions(人間への質問)
 
 - 撥音の既定: **伝統式(shimbun)で仮決定・実装済み**(Decisions 参照)。修正式(shinbun)をバリアント規則として REQ-002 に追加するか、確認をお願いします
-- REQ-003 の検索ターゲット 10 件の URL テンプレートは人間の実ブラウザ確認待ち(Blockers 参照)— 次ループの前提
+- REQ-003 の URL テンプレートは仮投入で実装完了。人間の実ブラウザ確認 → targets.ts のテンプレ差し替え・verifiedAt 更新をお願いします(Blockers/Decisions 参照)
 

@@ -34,6 +34,7 @@
 | 2 | feat/REQ-001-hepburn(2/3) | TC-003, 004, 005 | 1 | 撥音既定を仮決定(伝統式 shimbun。Open Question を AGENTS 9章に従い仮決定で進行・本欄で明示) | +108 −8 | 6 / 14 | test・lint・tsc ✓ | 一発 Green。トークン種別(syllable/sokuon/hatsuon)導入 |
 | 3 | feat/REQ-001-hepburn(3/3) | TC-006, 007, 009 + 周辺文字 | 1 | TC-009 の「なつめそうせき→natsume sōseki」をフィールド対と解釈(仮決定・テストコメントに明記) | +131 −13 | 7 / 21 | test・lint・tsc・**coverage 98.2%** ✓ | 一発 Green。REQ-001 完了・状態列更新 |
 | 4 | feat/REQ-002-variants | TC-011〜016 | 2 | なし | +250 −7 | 9 / 30 | test・lint・tsc・**coverage 98.0%** ✓ | テスト側の型誤り(Variant を文字列扱い)修正1回。REQ-002 完了 |
+| 5 | feat/REQ-003-targets-urlbuild | TC-021〜024 | 2 | URL テンプレを仮投入で進行(実ブラウザ確認待ち。AGENTS 9章の仮決定+明示) | +約300 | 10 / 40 | test・lint・tsc・build・**coverage core 99.4% / 全体 98.6%** ✓ | Red 1回(モジュール不在確認)+ lint 整形1回。実装バグ 0。targets.ts=data / urlBuild.ts=規則 に分離。RFC 3986 エンコードは自前実装。REQ-003 完了 |
 
 ## 第1回実行のサマリ(2026-07-03)
 
