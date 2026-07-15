@@ -1,0 +1,9 @@
+# 改行コードは LF に統一する。
+# Biome の既定 lineEnding は lf。Windows チェックアウト(core.autocrlf=true)で
+# 作業ツリーが CRLF になり `pnpm lint` が誤検知するのを防ぐ。
+* text=auto eol=lf
+
+# バイナリは変換しない
+*.png binary
+*.jpg binary
+*.ico binary
