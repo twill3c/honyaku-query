@@ -14,6 +14,7 @@ const setInput = (root: HTMLElement, id: string, value: string): void => {
 describe("REQ-004 mountApp 統合スモーク", () => {
   let root: HTMLElement;
   beforeEach(() => {
+    window.history.replaceState(null, "", "/"); // ハッシュ汚染を防ぐ
     root = document.createElement("div");
     document.body.append(root);
     mountApp(root);
@@ -21,6 +22,7 @@ describe("REQ-004 mountApp 統合スモーク", () => {
   afterEach(() => {
     root.remove();
     document.body.innerHTML = "";
+    window.history.replaceState(null, "", "/");
   });
 
   it("免責(NFR-005)を常時表示する", () => {
@@ -66,6 +68,48 @@ describe("REQ-004 mountApp 統合スモーク", () => {
     expect(namesEn).not.toContain("国立国会図書館サーチ");
     expect(namesEn).toContain("Wikidata"); // multi は残る
     expect(namesEn).toContain("Amazon.com(米)"); // en
+  });
+
+  it("REQ-006 入力・言語・選択が URL ハッシュに保存され再マウントで復元される", () => {
+    setInput(root, "sei", "なつめ");
+    setInput(root, "mei", "そうせき");
+    const langEl = root.querySelector<HTMLSelectElement>("#lang");
+    if (!langEl) throw new Error("no #lang");
+    langEl.value = "en";
+    langEl.dispatchEvent(new Event("change", { bubbles: true }));
+    // 1件だけ残して他を OFF にする
+    const boxes = [...root.querySelectorAll<HTMLInputElement>('#variants input[type="checkbox"]')];
+    for (const b of boxes.slice(1)) {
+      if (b.checked) {
+        b.checked = false;
+        b.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    }
+    expect(window.location.hash).not.toBe("");
+
+    // リロード相当: 旧 root を除去してから URL を保持したまま新規マウント → 状態が復元される
+    root.remove();
+    const root2 = document.createElement("div");
+    document.body.append(root2);
+    mountApp(root2);
+    expect(root2.querySelector<HTMLInputElement>("#sei")?.value).toBe("なつめ");
+    expect(root2.querySelector<HTMLInputElement>("#mei")?.value).toBe("そうせき");
+    expect(root2.querySelector<HTMLSelectElement>("#lang")?.value).toBe("en");
+    const checked2 = root2.querySelectorAll<HTMLInputElement>("#variants input:checked");
+    expect(checked2).toHaveLength(1);
+    // ja 専用ターゲットは復元後も en フィルタで出ない
+    const names = [...root2.querySelectorAll("#links .links a")].map((a) => a.textContent);
+    expect(names).not.toContain("国立国会図書館サーチ");
+  });
+
+  it("REQ-006 不正ハッシュでもクラッシュせず空状態で起動する", () => {
+    root.remove(); // beforeEach の root を除去(リロード相当)
+    window.history.replaceState(null, "", "/#%%%broken%%%");
+    const root2 = document.createElement("div");
+    document.body.append(root2);
+    expect(() => mountApp(root2)).not.toThrow();
+    expect(root2.querySelector<HTMLInputElement>("#sei")?.value).toBe("");
+    expect(root2.querySelector("#links")?.textContent).toContain("選択してください");
   });
 
   it("変換不能な読みはエラー表示・空入力は選択促し", () => {

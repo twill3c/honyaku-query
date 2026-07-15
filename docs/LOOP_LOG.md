@@ -37,6 +37,7 @@
 | 5 | feat/REQ-003-targets-urlbuild | TC-021〜024 | 2 | URL テンプレを仮投入で進行(実ブラウザ確認待ち。AGENTS 9章の仮決定+明示) | +約300 | 10 / 40 | test・lint・tsc・build・**coverage core 99.4% / 全体 98.6%** ✓ | Red 1回(モジュール不在確認)+ lint 整形1回。実装バグ 0。targets.ts=data / urlBuild.ts=規則 に分離。RFC 3986 エンコードは自前実装。REQ-003 完了 |
 | 6 | feat/REQ-004-ui | TC-025〜029 | 2 | REQ-004 に TC 未定義 → TC-025〜029 をエージェント提案(TEST_SPEC・人間承認待ち) | +約620 | 20 / 60 | test・lint・tsc・build・**coverage core 99.5% / 全体 98.0%**・bundle 5.2KB gzip ✓ | tsc の型厳格(exactOptional / 未 export)で 2 件修正、lint 整形 2 回。**jsdom 統合テストが app.ts の DOM 結線を検証**(免責・既定4件ON・トグル・エラー)。ロジックは core/query に集約し ui を薄く保持。REQ-004 完了・動く UI 成立 |
 | 7 | feat/REQ-005-lang-filter | TC-031 | 1 | 受入の「URL 同期」を REQ-006 に委譲(codec 依存。AGENTS 9章の仮決定) | +約90 | 5 / 65 | test・lint・tsc・build・**coverage core 99.5% / 全体 98.1%** ✓ | 一発 Green。純粋関数 filterTargetsByLang(multi 常時表示)+ 言語セレクタ配線。DOM 統合テストで ja 専用除外・multi 残存を end-to-end 検証。REQ-005 フィルタ完了 |
+| 8 | feat/REQ-006-url-share | TC-041, 042 | 2 | なし(REQ-005 の URL 同期を回収) | +約200 | 8 / 73 | test・lint・tsc・build・**coverage core 99.2% / 全体 97.6%** ✓ | codec(純粋・URLSearchParams)は一発 Green。DOM 復元テストで**再び jsdom の重複 id 落とし穴**(2つ目の root を旧 root 残置のままマウント→ getElementById 由来で querySelector null)。旧 root 除去=リロード相当に修正。codec=core / urlHash=adapter / 復元=ui に3層分離。REQ-005/006 完了 |
 
 ## 第1回実行のサマリ(2026-07-03)
 

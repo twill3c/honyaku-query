@@ -1,6 +1,8 @@
 // UI コントローラ(REQ-004)。DOM と状態を持ち、core/query と render を呼ぶだけ(ロジックは持たない)。
 // today は本レイヤで生成し core に注入する(core は Date.now() に触れない)。
 
+import { readStateFromHash, writeStateToHash } from "../adapters/urlHash";
+import type { SearchState } from "../core/codec";
 import { buildCopyString, buildLinks, buildVariants, defaultSelectedValues } from "../core/query";
 import { type LangFilter, TARGETS, filterTargetsByLang } from "../core/targets";
 import type { Variant } from "../core/variants";
@@ -60,19 +62,35 @@ export function mountApp(root: HTMLElement): void {
 
   const selectedVariants = (): Variant[] => allVariants.filter((v) => selected.has(v.value));
 
+  const currentState = (): SearchState => ({
+    seiKana: seiEl.value,
+    meiKana: meiEl.value,
+    titleKana: titleEl.value,
+    lang: langEl.value as LangFilter,
+    selected: selectedVariants().map((v) => v.value),
+  });
+
+  const persist = (): void => writeStateToHash(currentState());
+
   const renderLinksPane = (): void => {
     const targets = filterTargetsByLang(TARGETS, langEl.value as LangFilter);
     linksEl.innerHTML = renderLinks(buildLinks(selectedVariants(), targets, today));
   };
 
-  const recompute = (): void => {
+  /** バリアントを再計算して描画する。override 指定時はその選択を(現存する value のみ)復元する。 */
+  const recompute = (override?: readonly string[]): void => {
     const res = buildVariants({
       seiKana: seiEl.value,
       meiKana: meiEl.value,
       titleKana: titleEl.value,
     });
     allVariants = [...res.nameVariants, ...res.titleVariants];
-    selected = defaultSelectedValues(allVariants);
+    if (override === undefined) {
+      selected = defaultSelectedValues(allVariants);
+    } else {
+      const available = new Set(allVariants.map((v) => v.value));
+      selected = new Set(override.filter((v) => available.has(v)));
+    }
 
     errorsEl.innerHTML = renderErrors(res.errors);
     const nameHtml = renderVariantList(res.nameVariants, selected);
@@ -85,13 +103,17 @@ export function mountApp(root: HTMLElement): void {
   };
 
   for (const el of [seiEl, meiEl, titleEl]) {
-    el.addEventListener("input", recompute);
+    el.addEventListener("input", () => {
+      recompute();
+      persist();
+    });
   }
 
   // 言語フィルタはバリアント選択に影響しないためリンクのみ再描画する
   langEl.addEventListener("change", () => {
     copiedEl.textContent = "";
     renderLinksPane();
+    persist();
   });
 
   variantsEl.addEventListener("change", (e) => {
@@ -103,6 +125,7 @@ export function mountApp(root: HTMLElement): void {
     else selected.delete(value);
     copiedEl.textContent = "";
     renderLinksPane();
+    persist();
   });
 
   $<HTMLButtonElement>("copy").addEventListener("click", () => {
@@ -112,5 +135,11 @@ export function mountApp(root: HTMLElement): void {
     });
   });
 
-  recompute();
+  // 起動時に URL ハッシュから復元(REQ-006 / REQ-005 の URL 同期)
+  const initial = readStateFromHash();
+  seiEl.value = initial.seiKana;
+  meiEl.value = initial.meiKana;
+  titleEl.value = initial.titleKana;
+  langEl.value = initial.lang;
+  recompute(initial.selected.length > 0 ? initial.selected : undefined);
 }
