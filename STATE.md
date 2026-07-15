@@ -4,11 +4,11 @@
 
 ## Current Phase
 
-Phase 2 — 中核機能(REQ-001〜004)完了。動く UI が成立。次は **Vercel 初回デプロイ** → REQ-005(言語フィルタ)/ 006(URL共有)/ 007(最近の検索)
+Phase 2 — REQ-001〜006 完了(Must 全完了 + Should 全完了)。残りは REQ-007(Could・最近の検索)と Vercel 初回デプロイ(人間/運用ステップ)
 
 ## Now(現在着手中)
 
-- なし(次ループで REQ-006 URL 共有 = codec + urlHash。REQ-005 の URL 同期もここで回収)
+- なし(次ループで REQ-007 最近の検索 = storage adapter、TC-051)
 
 ## Next Actions(次にやること・計画メモ)
 
@@ -16,8 +16,8 @@ Phase 2 — 中核機能(REQ-001〜004)完了。動く UI が成立。次は **V
 - [x] REQ-002: `src/core/variants.ts` — 1ループで完了(LOOP_LOG #4)
 - [x] REQ-003: `src/core/targets.ts` + `urlBuild.ts` — 1ループで完了(LOOP_LOG #5、TC-021〜024)
 - [x] REQ-004: `src/core/query.ts`(view-model)+ `src/ui/*` — 1ループで完了(LOOP_LOG #6、TC-025〜029)
-- [x] REQ-005: `filterTargetsByLang` + 言語セレクタ — フィルタ完了(LOOP_LOG #7、TC-031)。URL 同期は REQ-006 へ
-- [ ] REQ-006 URL 共有(codec + urlHash、TC-041/042)+ REQ-005 の URL 同期回収
+- [x] REQ-005: `filterTargetsByLang` + 言語セレクタ — 完了(LOOP_LOG #7、TC-031)。URL 同期は REQ-006 で回収済み
+- [x] REQ-006: `codec.ts` + `adapters/urlHash.ts` + app.ts 配線 — 完了(LOOP_LOG #8、TC-041/042)。REQ-005 の URL 同期も達成
 - [ ] REQ-007 最近の検索(storage、TC-051)
 - [ ] Vercel 初回デプロイ(人間/運用ステップ、Blockers 参照)
 
@@ -25,6 +25,7 @@ Phase 2 — 中核機能(REQ-001〜004)完了。動く UI が成立。次は **V
 
 | 日付 | REQ/TC | 内容 | PR |
 |---|---|---|---|
+| 2026-07-15 | REQ-006 / TC-041,042 | codec + urlHash + 復元/書き戻し配線(core 99.2% / 全体 97.6%、73 tests)。REQ-005 URL 同期も達成 | feat/REQ-006-url-share |
 | 2026-07-15 | REQ-005 / TC-031 | 言語フィルタ完了(core 99.5% / 全体 98.1%、65 tests)。URL 同期は REQ-006 へ | feat/REQ-005-lang-filter |
 | 2026-07-15 | REQ-004 / TC-025〜029 | query(view-model)+ UI 完了(core 99.5% / 全体 98.0%、bundle 5.2KB gzip) | feat/REQ-004-ui |
 | 2026-07-15 | REQ-003 / TC-021〜024 | targets + urlBuild 完了(core 99.4% / 全体 98.6%) | feat/REQ-003-targets-urlbuild |
@@ -42,6 +43,8 @@ Phase 2 — 中核機能(REQ-001〜004)完了。動く UI が成立。次は **V
 
 | 日付 | 決定 | 理由 / 代替案 |
 |---|---|---|
+| 2026-07-15 | ハッシュ形式は URLSearchParams(s/m/t/l/v)。既定値は省略し空状態=空ハッシュ | JSON+base64 より可読・堅牢(パーセントエンコードで丸ごと往復)。selected は v の反復で順序保持。書き戻しは replaceState(履歴を汚さない) |
+| 2026-07-15 | 復元時に selected は現存する variant value のみ採用 | 古い共有 URL や読み変更でバリアント集合が変わっても安全(存在しない選択は無視)。決定性を維持 |
 | 2026-07-15 | REQ-005 の「URL クエリ同期」を REQ-006 に委譲。本ループはフィルタ本体+セレクタ UI まで | URL 同期は codec(状態⇔ハッシュ)に依存。REQ-006 で言語・ONバリアント含め一括シリアライズする方が重複がない(AGENTS 9章の仮決定)。filterTargetsByLang は純粋・順序保存 |
 | 2026-07-15 | REQ-004 のロジックを `src/core/query.ts`(view-model)に集約し ui は薄く保つ | AGENTS 5章「ui はロジックを持たない」。純粋関数で node テスト可能に(TC-025〜029)。render は HTML 文字列を返す純関数、app は DOM/状態のみ |
 | 2026-07-15 | jsdom を devDependency 追加(UI 結線の統合テスト用) | NFR-003 はランタイムバンドル制約でありテスト専用 devDep は対象外。app.ts の DOM 結線を end-to-end 検証(免責表示・既定4件ON・トグル・エラー)。**発見**: テスト側の body 未クリアで重複 id → jsdom の getElementById 由来で querySelector が null。afterEach でクリアして解消(本番は #app へ1回マウントのみで無害) |
