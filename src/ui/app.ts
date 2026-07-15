@@ -2,10 +2,14 @@
 // today は本レイヤで生成し core に注入する(core は Date.now() に触れない)。
 
 import { buildCopyString, buildLinks, buildVariants, defaultSelectedValues } from "../core/query";
-import { TARGETS } from "../core/targets";
+import { type LangFilter, TARGETS, filterTargetsByLang } from "../core/targets";
 import type { Variant } from "../core/variants";
-import { DISCLAIMER, LABELS, LEAD, TITLE } from "./messages";
+import { DISCLAIMER, LABELS, LANG_OPTIONS, LEAD, TITLE } from "./messages";
 import { renderErrors, renderLinks, renderVariantList } from "./render";
+
+const langOptionsHtml = LANG_OPTIONS.map(
+  (o) => `<option value="${o.value}">${o.label}</option>`,
+).join("");
 
 const SHELL = `
   <header>
@@ -16,6 +20,7 @@ const SHELL = `
     <label>${LABELS.sei}<input id="sei" type="text" inputmode="kana" /></label>
     <label>${LABELS.mei}<input id="mei" type="text" inputmode="kana" /></label>
     <label>${LABELS.title}<input id="title" type="text" inputmode="kana" /></label>
+    <label>${LABELS.lang}<select id="lang">${langOptionsHtml}</select></label>
   </form>
   <p class="disclaimer" role="note">${DISCLAIMER}</p>
   <div id="errors"></div>
@@ -43,6 +48,7 @@ export function mountApp(root: HTMLElement): void {
   const seiEl = $<HTMLInputElement>("sei");
   const meiEl = $<HTMLInputElement>("mei");
   const titleEl = $<HTMLInputElement>("title");
+  const langEl = $<HTMLSelectElement>("lang");
   const errorsEl = $("errors");
   const variantsEl = $("variants");
   const linksEl = $("links");
@@ -55,7 +61,8 @@ export function mountApp(root: HTMLElement): void {
   const selectedVariants = (): Variant[] => allVariants.filter((v) => selected.has(v.value));
 
   const renderLinksPane = (): void => {
-    linksEl.innerHTML = renderLinks(buildLinks(selectedVariants(), TARGETS, today));
+    const targets = filterTargetsByLang(TARGETS, langEl.value as LangFilter);
+    linksEl.innerHTML = renderLinks(buildLinks(selectedVariants(), targets, today));
   };
 
   const recompute = (): void => {
@@ -80,6 +87,12 @@ export function mountApp(root: HTMLElement): void {
   for (const el of [seiEl, meiEl, titleEl]) {
     el.addEventListener("input", recompute);
   }
+
+  // 言語フィルタはバリアント選択に影響しないためリンクのみ再描画する
+  langEl.addEventListener("change", () => {
+    copiedEl.textContent = "";
+    renderLinksPane();
+  });
 
   variantsEl.addEventListener("change", (e) => {
     const target = e.target as HTMLElement;
