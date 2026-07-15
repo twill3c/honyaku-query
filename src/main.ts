@@ -1,5 +1,8 @@
-// エントリポイント。起動シーケンスのみを持つ。
+// エントリポイント。起動シーケンスのみを持つ(REQ-004)。
+import "./ui/styles.css";
+import { mountApp } from "./ui/app";
+
 const app = document.querySelector<HTMLDivElement>("#app");
 if (app) {
-  app.textContent = "honyaku-query — scaffold ready";
+  mountApp(app);
 }

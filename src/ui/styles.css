@@ -1,0 +1,176 @@
+:root {
+  --fg: #1a1a1a;
+  --muted: #666;
+  --bg: #fff;
+  --accent: #0b5fff;
+  --border: #ddd;
+  --warn: #b26a00;
+  font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--fg);
+  background: var(--bg);
+  line-height: 1.6;
+}
+
+#app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+h1 {
+  font-size: 1.4rem;
+  margin: 0 0 0.25rem;
+}
+
+.lead {
+  color: var(--muted);
+  margin: 0 0 1rem;
+}
+
+form#q {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+form#q label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  color: var(--muted);
+  gap: 0.25rem;
+}
+
+form#q input {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.disclaimer {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-left: 3px solid var(--border);
+  padding-left: 0.6rem;
+}
+
+.errors {
+  color: #a00;
+  background: #fff2f2;
+  border: 1px solid #f3c2c2;
+  border-radius: 6px;
+  padding: 0.5rem 0.9rem;
+  margin: 0.5rem 0;
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 720px) {
+  .cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+h2 {
+  font-size: 1rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+}
+
+ul.variants,
+ul.links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+ul.variants li {
+  padding: 0.15rem 0;
+}
+
+.v {
+  font-weight: 600;
+}
+
+.tags {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.grp {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0.8rem 0 0.2rem;
+}
+
+.link-group {
+  margin-bottom: 1rem;
+}
+
+.link-group h3 {
+  font-size: 0.95rem;
+  margin: 0 0 0.3rem;
+}
+
+ul.links li {
+  padding: 0.12rem 0;
+}
+
+ul.links a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+ul.links a:hover {
+  text-decoration: underline;
+}
+
+.stale {
+  font-size: 0.7rem;
+  color: var(--warn);
+  border: 1px solid var(--warn);
+  border-radius: 4px;
+  padding: 0 0.3rem;
+}
+
+.copybar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+#copy {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#copied {
+  font-size: 0.8rem;
+  color: #0a7a2f;
+}
+
+.empty {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
