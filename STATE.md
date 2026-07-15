@@ -4,23 +4,25 @@
 
 ## Current Phase
 
-Phase 1 — 共有モジュール(REQ-001/002)+ リンク生成(REQ-003)完了。次は最小 UI(REQ-004)→ 初回デプロイ
+Phase 2 — 中核機能(REQ-001〜004)完了。動く UI が成立。次は **Vercel 初回デプロイ** → REQ-005(言語フィルタ)/ 006(URL共有)/ 007(最近の検索)
 
 ## Now(現在着手中)
 
-- なし(次ループで REQ-004 UI に着手)
+- なし(次ループで Vercel 初回デプロイ、または REQ-005 に着手)
 
 ## Next Actions(次にやること・計画メモ)
 
 - [x] REQ-001: `src/core/hepburn.ts` — 3ループで完了(LOOP_LOG #1〜3)
 - [x] REQ-002: `src/core/variants.ts` — 1ループで完了(LOOP_LOG #4)
 - [x] REQ-003: `src/core/targets.ts` + `urlBuild.ts` — 1ループで完了(LOOP_LOG #5、TC-021〜024)
-- [ ] REQ-004 UI → Vercel 初回デプロイ → REQ-005 / 006 / 007
+- [x] REQ-004: `src/core/query.ts`(view-model)+ `src/ui/*` — 1ループで完了(LOOP_LOG #6、TC-025〜029)
+- [ ] Vercel 初回デプロイ → REQ-005(TC-031)/ 006(TC-041/042)/ 007(TC-051)
 
 ## Done(完了ログ)
 
 | 日付 | REQ/TC | 内容 | PR |
 |---|---|---|---|
+| 2026-07-15 | REQ-004 / TC-025〜029 | query(view-model)+ UI 完了(core 99.5% / 全体 98.0%、bundle 5.2KB gzip) | feat/REQ-004-ui |
 | 2026-07-15 | REQ-003 / TC-021〜024 | targets + urlBuild 完了(core 99.4% / 全体 98.6%) | feat/REQ-003-targets-urlbuild |
 | 2026-07-03 | REQ-002 / TC-011〜016 | variants 完了(coverage 98.0%) | ローカルマージ fc37dcb |
 | 2026-07-03 | REQ-001 / TC-001〜009 | hepburn 完了(coverage 98.2%) | ローカルマージ efcf45d |
@@ -35,6 +37,9 @@ Phase 1 — 共有モジュール(REQ-001/002)+ リンク生成(REQ-003)完了�
 
 | 日付 | 決定 | 理由 / 代替案 |
 |---|---|---|
+| 2026-07-15 | REQ-004 のロジックを `src/core/query.ts`(view-model)に集約し ui は薄く保つ | AGENTS 5章「ui はロジックを持たない」。純粋関数で node テスト可能に(TC-025〜029)。render は HTML 文字列を返す純関数、app は DOM/状態のみ |
+| 2026-07-15 | jsdom を devDependency 追加(UI 結線の統合テスト用) | NFR-003 はランタイムバンドル制約でありテスト専用 devDep は対象外。app.ts の DOM 結線を end-to-end 検証(免責表示・既定4件ON・トグル・エラー)。**発見**: テスト側の body 未クリアで重複 id → jsdom の getElementById 由来で querySelector が null。afterEach でクリアして解消(本番は #app へ1回マウントのみで無害) |
+| 2026-07-15 | 既定 ON は姓名+作品名を結合した優先度順の上位4件 | SPEC「上位4件 ON」を2リスト構成に適用。結合順(姓名→作品名)で決定的 |
 | 2026-07-15 | REQ-003 の URL テンプレートを仮投入して実装を進行(人間の実ブラウザ確認待ち) | AGENTS 9章に従い影響小の仮決定。URL は差し替え可能なデータで構造・検証には影響しない。テンプレは data として targets.ts に集約し、規則(エンコード・検証・鮮度)はロジック側 |
 | 2026-07-15 | RFC 3986 準拠エンコードを自前実装(encodeURIComponent + `!'()*` 追加符号化) | TC-023 が `'`→`%27` を要求。encodeURIComponent は sub-delims を素通しするため不足。plus 方式は %20→+ 置換で対応 |
 | 2026-07-15 | 鮮度判定 `isStale(target, today)` は today を注入 | core は Date.now() 禁止(AGENTS 5章)。verifiedAt は UTC 深夜として解釈し 365 日超で stale |

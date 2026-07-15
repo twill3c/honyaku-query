@@ -35,6 +35,7 @@
 | 3 | feat/REQ-001-hepburn(3/3) | TC-006, 007, 009 + 周辺文字 | 1 | TC-009 の「なつめそうせき→natsume sōseki」をフィールド対と解釈(仮決定・テストコメントに明記) | +131 −13 | 7 / 21 | test・lint・tsc・**coverage 98.2%** ✓ | 一発 Green。REQ-001 完了・状態列更新 |
 | 4 | feat/REQ-002-variants | TC-011〜016 | 2 | なし | +250 −7 | 9 / 30 | test・lint・tsc・**coverage 98.0%** ✓ | テスト側の型誤り(Variant を文字列扱い)修正1回。REQ-002 完了 |
 | 5 | feat/REQ-003-targets-urlbuild | TC-021〜024 | 2 | URL テンプレを仮投入で進行(実ブラウザ確認待ち。AGENTS 9章の仮決定+明示) | +約300 | 10 / 40 | test・lint・tsc・build・**coverage core 99.4% / 全体 98.6%** ✓ | Red 1回(モジュール不在確認)+ lint 整形1回。実装バグ 0。targets.ts=data / urlBuild.ts=規則 に分離。RFC 3986 エンコードは自前実装。REQ-003 完了 |
+| 6 | feat/REQ-004-ui | TC-025〜029 | 2 | REQ-004 に TC 未定義 → TC-025〜029 をエージェント提案(TEST_SPEC・人間承認待ち) | +約620 | 20 / 60 | test・lint・tsc・build・**coverage core 99.5% / 全体 98.0%**・bundle 5.2KB gzip ✓ | tsc の型厳格(exactOptional / 未 export)で 2 件修正、lint 整形 2 回。**jsdom 統合テストが app.ts の DOM 結線を検証**(免責・既定4件ON・トグル・エラー)。ロジックは core/query に集約し ui を薄く保持。REQ-004 完了・動く UI 成立 |
 
 ## 第1回実行のサマリ(2026-07-03)
 
