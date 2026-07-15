@@ -4,11 +4,11 @@
 
 ## Current Phase
 
-Phase 3 — **全 REQ(001〜007)完了**。残りは Vercel 初回デプロイ(人間/運用ステップのみ)。3部作その1の共有モジュール(hepburn/variants)は vendor 取り込み可能な状態
+Phase 4 — **全 REQ(001〜007)完了 + Vercel 初回デプロイ完了(本番公開中)**。本番 URL: https://honyaku-query.vercel.app 。3部作その1の共有モジュール(hepburn/variants)は vendor 取り込み可能な状態
 
 ## Now(現在着手中)
 
-- なし。全機能実装済み。人間の作業: (1) REQ-003 URL テンプレの実ブラウザ確認 (2) Vercel 初回デプロイ (3) エージェント提案 TC(025〜029)の承認
+- なし。実装・デプロイとも完了。残る人間の作業: (1) REQ-003 URL テンプレの実ブラウザ確認 → targets.ts 差し替え → 再デプロイ (2) エージェント提案 TC(025〜029)の承認 (3) 任意: GitHub リモート連携で push 自動デプロイ化
 
 ## Next Actions(次にやること・計画メモ)
 
@@ -19,12 +19,13 @@ Phase 3 — **全 REQ(001〜007)完了**。残りは Vercel 初回デプロイ(�
 - [x] REQ-005: `filterTargetsByLang` + 言語セレクタ — 完了(LOOP_LOG #7、TC-031)。URL 同期は REQ-006 で回収済み
 - [x] REQ-006: `codec.ts` + `adapters/urlHash.ts` + app.ts 配線 — 完了(LOOP_LOG #8、TC-041/042)。REQ-005 の URL 同期も達成
 - [x] REQ-007: `core/recent.ts` + `adapters/storage.ts` + ui — 完了(LOOP_LOG #9、TC-051)
-- [ ] Vercel 初回デプロイ(人間/運用ステップ、Blockers 参照)
+- [x] Vercel 初回デプロイ完了(vercel.json + CLI `vercel --prod`)。本番 https://honyaku-query.vercel.app
 
 ## Done(完了ログ)
 
 | 日付 | REQ/TC | 内容 | PR |
 |---|---|---|---|
+| 2026-07-15 | deploy | Vercel 初回デプロイ(vercel.json + `vercel --prod --yes`)。本番公開・HTTP 200・アセット/ヘッダ検証済み。URL: https://honyaku-query.vercel.app | chore/vercel-config |
 | 2026-07-15 | REQ-007 / TC-051 | recent + storage + ui(core 99.2% / 全体 97.6%、86 tests)。**全 REQ 完了** | feat/REQ-007-recent |
 | 2026-07-15 | REQ-006 / TC-041,042 | codec + urlHash + 復元/書き戻し配線(core 99.2% / 全体 97.6%、73 tests)。REQ-005 URL 同期も達成 | feat/REQ-006-url-share |
 | 2026-07-15 | REQ-005 / TC-031 | 言語フィルタ完了(core 99.5% / 全体 98.1%、65 tests)。URL 同期は REQ-006 へ | feat/REQ-005-lang-filter |
@@ -37,13 +38,14 @@ Phase 3 — **全 REQ(001〜007)完了**。残りは Vercel 初回デプロイ(�
 
 ## Blockers(障害・待ち)
 
-- **Vercel 初回デプロイ**はリモート未設定 + Vercel 認証なし(サンドボックス)で自動化不可。人間が (1) GitHub リモート作成・push (2) Vercel プロジェクト連携 を行う運用ステップ。ビルドは `pnpm build` → `dist/` 静的出力で確認済み(NFR-004 サーバレスなし)
-- 検索ターゲット12件の URL テンプレートは REQ-003 で**仮投入済み**(各サイト検索仕様に基づく)。人間の実ブラウザ確認 → 差し替え・verifiedAt 更新が残タスク(構造・エンコード方式・検証関数・鮮度判定は確定)。特に jpf-jltrans / bnf / dnb は要確認
+- ~~Vercel 初回デプロイ~~ → **解消**。Vercel CLI(twill3c-8670 で認証済み)から `vercel --prod` で本番公開。GitHub リモートは未使用(CLI が作業ディレクトリを直接アップロード)。今後 push 自動デプロイにするなら GitHub 連携が任意タスク
+- 検索ターゲット12件の URL テンプレートは REQ-003 で**仮投入済み**(各サイト検索仕様に基づく)。人間の実ブラウザ確認 → 差し替え・verifiedAt 更新が残タスク(構造・エンコード方式・検証関数・鮮度判定は確定)。特に jpf-jltrans / bnf / dnb は要確認。**差し替え後は `vercel --prod` で再デプロイ**
 
 ## Decisions(決定ログ)
 
 | 日付 | 決定 | 理由 / 代替案 |
 |---|---|---|
+| 2026-07-15 | 初回デプロイは Vercel CLI 直アップロード(`vercel --prod --yes`)。GitHub 連携は見送り | サンドボックスにリモート無しでも Vercel CLI が認証済み。CLI は作業ディレクトリを直接デプロイでき最短。git ベース CI/CD(push 自動デプロイ)は GitHub リポジトリ作成が前提のため任意の後続タスクに。vercel.json で framework=vite・静的のみ(NFR-004)を明示 |
 | 2026-07-15 | 改行コードを `.gitattributes`(`* text=auto eol=lf`)で LF に統一 | Windows(core.autocrlf=true)で作業ツリーが CRLF 化し `pnpm lint`(Biome=LF既定)が誤検知していた。ローカルは core.autocrlf=false + 既存ファイルを LF 正規化。CI/Linux は元々 LF blob で影響なし。全ループ共通の環境改善(chore ブランチ→main) |
 | 2026-07-15 | 「最近の検索」への記録タイミング=結果リンクのクリック時 | 明示的な検索ボタンを設けず(リンクはライブ生成)、実際に検索を使った瞬間=リンク遷移を記録点に。キーストローク毎の保存を避け決定的。エントリは SearchState 全体を保存し再実行で選択も復元。同定は読み+言語(recent.ts) |
 | 2026-07-15 | ハッシュ形式は URLSearchParams(s/m/t/l/v)。既定値は省略し空状態=空ハッシュ | JSON+base64 より可読・堅牢(パーセントエンコードで丸ごと往復)。selected は v の反復で順序保持。書き戻しは replaceState(履歴を汚さない) |
