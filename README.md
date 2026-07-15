@@ -1,5 +1,7 @@
 # honyaku-query — 翻訳探索クエリビルダー
 
+**本番: https://honyaku-query.vercel.app**(Vercel 静的配信・完全クライアントサイド)
+
 日本文学の海外語訳を探すための、表記ゆれ対応クエリビルダー。かな読みを入力すると、
 ヘボン式ローマ字化 → 表記バリアント展開(Sōseki/Soseki/Souseki、姓名順、イニシャル)→
 Wikidata・Open Library・WorldCat・NDL サーチ・JF 翻訳 DB 等への検索リンクを一括生成する。
