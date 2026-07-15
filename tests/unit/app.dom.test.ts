@@ -15,6 +15,7 @@ describe("REQ-004 mountApp 統合スモーク", () => {
   let root: HTMLElement;
   beforeEach(() => {
     window.history.replaceState(null, "", "/"); // ハッシュ汚染を防ぐ
+    localStorage.clear(); // 最近の検索の汚染を防ぐ
     root = document.createElement("div");
     document.body.append(root);
     mountApp(root);
@@ -23,6 +24,7 @@ describe("REQ-004 mountApp 統合スモーク", () => {
     root.remove();
     document.body.innerHTML = "";
     window.history.replaceState(null, "", "/");
+    localStorage.clear();
   });
 
   it("免責(NFR-005)を常時表示する", () => {
@@ -110,6 +112,30 @@ describe("REQ-004 mountApp 統合スモーク", () => {
     expect(() => mountApp(root2)).not.toThrow();
     expect(root2.querySelector<HTMLInputElement>("#sei")?.value).toBe("");
     expect(root2.querySelector("#links")?.textContent).toContain("選択してください");
+  });
+
+  it("REQ-007 リンク実行で最近の検索に記録され、再マウントで残り、クリックで復元", () => {
+    setInput(root, "sei", "なつめ");
+    setInput(root, "mei", "そうせき");
+    expect(root.querySelector("#recent")?.textContent).toContain("最近の検索はまだ");
+    // リンクを開く = 検索実行
+    root.querySelector<HTMLAnchorElement>("#links a")?.click();
+    const recentBtns = root.querySelectorAll("#recent button.recent");
+    expect(recentBtns).toHaveLength(1);
+    expect(recentBtns[0]?.textContent).toContain("なつめ そうせき");
+
+    // 再マウント(localStorage 永続)→ 最近の検索が残る
+    root.remove();
+    const root2 = document.createElement("div");
+    document.body.append(root2);
+    mountApp(root2);
+    const btn = root2.querySelector<HTMLButtonElement>("#recent button.recent");
+    expect(btn?.textContent).toContain("なつめ そうせき");
+
+    // クリックで復元
+    btn?.click();
+    expect(root2.querySelector<HTMLInputElement>("#sei")?.value).toBe("なつめ");
+    expect(root2.querySelector<HTMLInputElement>("#mei")?.value).toBe("そうせき");
   });
 
   it("変換不能な読みはエラー表示・空入力は選択促し", () => {

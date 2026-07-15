@@ -38,6 +38,7 @@
 | 6 | feat/REQ-004-ui | TC-025〜029 | 2 | REQ-004 に TC 未定義 → TC-025〜029 をエージェント提案(TEST_SPEC・人間承認待ち) | +約620 | 20 / 60 | test・lint・tsc・build・**coverage core 99.5% / 全体 98.0%**・bundle 5.2KB gzip ✓ | tsc の型厳格(exactOptional / 未 export)で 2 件修正、lint 整形 2 回。**jsdom 統合テストが app.ts の DOM 結線を検証**(免責・既定4件ON・トグル・エラー)。ロジックは core/query に集約し ui を薄く保持。REQ-004 完了・動く UI 成立 |
 | 7 | feat/REQ-005-lang-filter | TC-031 | 1 | 受入の「URL 同期」を REQ-006 に委譲(codec 依存。AGENTS 9章の仮決定) | +約90 | 5 / 65 | test・lint・tsc・build・**coverage core 99.5% / 全体 98.1%** ✓ | 一発 Green。純粋関数 filterTargetsByLang(multi 常時表示)+ 言語セレクタ配線。DOM 統合テストで ja 専用除外・multi 残存を end-to-end 検証。REQ-005 フィルタ完了 |
 | 8 | feat/REQ-006-url-share | TC-041, 042 | 2 | なし(REQ-005 の URL 同期を回収) | +約200 | 8 / 73 | test・lint・tsc・build・**coverage core 99.2% / 全体 97.6%** ✓ | codec(純粋・URLSearchParams)は一発 Green。DOM 復元テストで**再び jsdom の重複 id 落とし穴**(2つ目の root を旧 root 残置のままマウント→ getElementById 由来で querySelector null)。旧 root 除去=リロード相当に修正。codec=core / urlHash=adapter / 復元=ui に3層分離。REQ-005/006 完了 |
+| 9 | feat/REQ-007-recent | TC-051 | 1 | なし | +約200 | 13 / 86 | test・lint・tsc・build・**coverage core 99.2% / 全体 97.6%** ✓ | 一発 Green。recent.ts(純粋: 重複繰上げ・上限10)/ storage.ts(localStorage・例外/破損/未対応を握り潰し)。storage 耐障害性は vi.stubGlobal で quota・不可環境を再現。DOM 統合で記録→永続→復元を end-to-end 検証。**全 REQ 完了** |
 
 ## 第1回実行のサマリ(2026-07-03)
 
@@ -46,3 +47,12 @@
 - 人間介入 2 件はいずれも「仕様解釈の仮決定」で、AGENTS 9章(仮決定+明示)のフロー通りに処理できた
 - 逸脱: GitHub 不可(ローカル git 代替)、REQ-001 の 3PR 分割計画は 3 ループ 1 マージに変更
 - **vendor 本家として成立**: hepburn/variants が実装済みとなり、6 消費者(honyaku-atlas, prize-atlas, kaigaidai-query, eigajin-query, kaigai-joei-query ほか)の vendor 取り込みが机上から実行可能になった
+
+## 第2回実行のサマリ(2026-07-15)
+
+- **5ループ(#5〜9)/ REQ-003〜007 の 5 REQ 完了 / テスト 30→86 本 / core カバレッジ 99% 維持・全体 98%**。これで **全 REQ(001〜007)完了**、残りは Vercel 初回デプロイ(人間)のみ
+- Red→Green 往復: 平均 1.6(一発 Green 3回: #7 REQ-005, #9 REQ-007, および core モジュール群)。失敗は**実装バグ 0**を維持。内訳は tsc 型厳格対応・lint 整形・そして **jsdom の重複 id 落とし穴(#6, #8 で2回)** — テストハーネス側の学びで、本番(単一 #app マウント)には無害
+- **層分離が効いた**: 純粋ロジック(query/filter/codec/recent)を core に集約し、副作用(urlHash/storage)を adapters に隔離、ui を薄く保ったことで、UI 機能(004〜007)でも node の純関数テストで大半を被覆し、DOM 統合テスト(jsdom)は結線確認に限定できた
+- 人間介入は「仕様解釈の仮決定」中心(URL テンプレ仮投入・REQ-005 の URL 同期を REQ-006 へ委譲・REQ-004 の TC 提案)。いずれも AGENTS 9章のフロー通り、作業を止めずに進行
+- 逸脱: GitHub/Vercel 不可(ローカル git マージで PR 代替)を全ループ継続。devDep に jsdom 追加(テスト専用、NFR-003 非対象)
+- **成果物**: 完全クライアントサイドの動く Web ツール(bundle 6.5KB gzip ≪ NFR-003 150KB)。`pnpm build` → `dist/` 静的出力で Vercel 配信可能
