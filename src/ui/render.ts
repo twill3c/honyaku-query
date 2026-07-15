@@ -2,6 +2,7 @@
 // DOM・状態は持たない(app.ts の責務)。ユーザ入力は必ず escapeHtml を通す(TC-029: XSS 防止)。
 
 import type { FieldError, VariantLinks } from "../core/query";
+import type { RecentEntry } from "../core/recent";
 import type { Variant } from "../core/variants";
 
 /** HTML 特殊文字を実体参照化する。属性値・テキスト両方で安全な最小集合。 */
@@ -50,6 +51,25 @@ export function renderLinks(rows: readonly VariantLinks[]): string {
       return `<section class="link-group"><h3>${escapeHtml(row.variant.value)}</h3><ul class="links">${links}</ul></section>`;
     })
     .join("");
+}
+
+/** 最近の検索エントリの表示ラベル(読み3項を空白連結 + all 以外は言語を付す)。 */
+export function recentLabel(e: RecentEntry): string {
+  const parts = [e.seiKana, e.meiKana, e.titleKana].filter((s) => s !== "");
+  const base = parts.join(" ");
+  return e.lang === "all" ? base : `${base} [${e.lang}]`;
+}
+
+/** 最近の検索一覧(クリックで再実行するボタン列)。data-index で app が復元する。 */
+export function renderRecent(entries: readonly RecentEntry[]): string {
+  if (entries.length === 0) return `<p class="empty">最近の検索はまだありません。</p>`;
+  const items = entries
+    .map(
+      (e, i) =>
+        `<li><button type="button" class="recent" data-index="${i}">${escapeHtml(recentLabel(e))}</button></li>`,
+    )
+    .join("");
+  return `<ul class="recents">${items}</ul>`;
 }
 
 /** 変換不能エラー(該当フィールドと位置)を表示する。 */

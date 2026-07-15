@@ -1,13 +1,15 @@
 // UI コントローラ(REQ-004)。DOM と状態を持ち、core/query と render を呼ぶだけ(ロジックは持たない)。
 // today は本レイヤで生成し core に注入する(core は Date.now() に触れない)。
 
+import { loadRecent, saveRecent } from "../adapters/storage";
 import { readStateFromHash, writeStateToHash } from "../adapters/urlHash";
 import type { SearchState } from "../core/codec";
 import { buildCopyString, buildLinks, buildVariants, defaultSelectedValues } from "../core/query";
+import { type RecentEntry, pushRecent } from "../core/recent";
 import { type LangFilter, TARGETS, filterTargetsByLang } from "../core/targets";
 import type { Variant } from "../core/variants";
 import { DISCLAIMER, LABELS, LANG_OPTIONS, LEAD, TITLE } from "./messages";
-import { renderErrors, renderLinks, renderVariantList } from "./render";
+import { renderErrors, renderLinks, renderRecent, renderVariantList } from "./render";
 
 const langOptionsHtml = LANG_OPTIONS.map(
   (o) => `<option value="${o.value}">${o.label}</option>`,
@@ -40,6 +42,10 @@ const SHELL = `
       <div id="links"></div>
     </div>
   </div>
+  <section class="recent-section">
+    <h2>${LABELS.recent}</h2>
+    <div id="recent"></div>
+  </section>
 `;
 
 /** アプリを root にマウントし、イベントを配線する。 */
@@ -55,10 +61,16 @@ export function mountApp(root: HTMLElement): void {
   const variantsEl = $("variants");
   const linksEl = $("links");
   const copiedEl = $("copied");
+  const recentEl = $("recent");
 
   let allVariants: Variant[] = [];
   let selected = new Set<string>();
+  let recent: RecentEntry[] = loadRecent();
   const today = new Date();
+
+  const renderRecentPane = (): void => {
+    recentEl.innerHTML = renderRecent(recent);
+  };
 
   const selectedVariants = (): Variant[] => allVariants.filter((v) => selected.has(v.value));
 
@@ -135,11 +147,38 @@ export function mountApp(root: HTMLElement): void {
     });
   });
 
+  // リンクを開いた = 検索を実行した、とみなして最近の検索へ記録する(REQ-007)
+  linksEl.addEventListener("click", (e) => {
+    const anchor = (e.target as HTMLElement).closest("a");
+    if (anchor === null) return;
+    const state = currentState();
+    if (state.seiKana === "" && state.meiKana === "" && state.titleKana === "") return;
+    recent = pushRecent(recent, state);
+    saveRecent(recent);
+    renderRecentPane();
+  });
+
+  // 最近の検索をクリックで再実行(状態を復元し URL も同期)
+  recentEl.addEventListener("click", (e) => {
+    const button = (e.target as HTMLElement).closest("button.recent");
+    if (!(button instanceof HTMLElement)) return;
+    const index = Number(button.dataset.index);
+    const entry = recent[index];
+    if (entry === undefined) return;
+    applyState(entry);
+    persist();
+  });
+
+  /** 検索状態を入力欄・言語・選択に反映してバリアントを再計算する。 */
+  function applyState(state: SearchState): void {
+    seiEl.value = state.seiKana;
+    meiEl.value = state.meiKana;
+    titleEl.value = state.titleKana;
+    langEl.value = state.lang;
+    recompute(state.selected.length > 0 ? state.selected : undefined);
+  }
+
+  renderRecentPane();
   // 起動時に URL ハッシュから復元(REQ-006 / REQ-005 の URL 同期)
-  const initial = readStateFromHash();
-  seiEl.value = initial.seiKana;
-  meiEl.value = initial.meiKana;
-  titleEl.value = initial.titleKana;
-  langEl.value = initial.lang;
-  recompute(initial.selected.length > 0 ? initial.selected : undefined);
+  applyState(readStateFromHash());
 }

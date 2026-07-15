@@ -16,6 +16,7 @@ export const LABELS = {
   lang: "対象言語で絞り込み",
   copy: "選択中の表記を一括コピー",
   copied: "コピーしました",
+  recent: "最近の検索",
 } as const;
 
 /** 言語フィルタの選択肢(value は core の LangFilter に一致)。REQ-005。 */

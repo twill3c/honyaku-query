@@ -4,11 +4,11 @@
 
 ## Current Phase
 
-Phase 2 — REQ-001〜006 完了(Must 全完了 + Should 全完了)。残りは REQ-007(Could・最近の検索)と Vercel 初回デプロイ(人間/運用ステップ)
+Phase 3 — **全 REQ(001〜007)完了**。残りは Vercel 初回デプロイ(人間/運用ステップのみ)。3部作その1の共有モジュール(hepburn/variants)は vendor 取り込み可能な状態
 
 ## Now(現在着手中)
 
-- なし(次ループで REQ-007 最近の検索 = storage adapter、TC-051)
+- なし。全機能実装済み。人間の作業: (1) REQ-003 URL テンプレの実ブラウザ確認 (2) Vercel 初回デプロイ (3) エージェント提案 TC(025〜029)の承認
 
 ## Next Actions(次にやること・計画メモ)
 
@@ -18,13 +18,14 @@ Phase 2 — REQ-001〜006 完了(Must 全完了 + Should 全完了)。残りは 
 - [x] REQ-004: `src/core/query.ts`(view-model)+ `src/ui/*` — 1ループで完了(LOOP_LOG #6、TC-025〜029)
 - [x] REQ-005: `filterTargetsByLang` + 言語セレクタ — 完了(LOOP_LOG #7、TC-031)。URL 同期は REQ-006 で回収済み
 - [x] REQ-006: `codec.ts` + `adapters/urlHash.ts` + app.ts 配線 — 完了(LOOP_LOG #8、TC-041/042)。REQ-005 の URL 同期も達成
-- [ ] REQ-007 最近の検索(storage、TC-051)
+- [x] REQ-007: `core/recent.ts` + `adapters/storage.ts` + ui — 完了(LOOP_LOG #9、TC-051)
 - [ ] Vercel 初回デプロイ(人間/運用ステップ、Blockers 参照)
 
 ## Done(完了ログ)
 
 | 日付 | REQ/TC | 内容 | PR |
 |---|---|---|---|
+| 2026-07-15 | REQ-007 / TC-051 | recent + storage + ui(core 99.2% / 全体 97.6%、86 tests)。**全 REQ 完了** | feat/REQ-007-recent |
 | 2026-07-15 | REQ-006 / TC-041,042 | codec + urlHash + 復元/書き戻し配線(core 99.2% / 全体 97.6%、73 tests)。REQ-005 URL 同期も達成 | feat/REQ-006-url-share |
 | 2026-07-15 | REQ-005 / TC-031 | 言語フィルタ完了(core 99.5% / 全体 98.1%、65 tests)。URL 同期は REQ-006 へ | feat/REQ-005-lang-filter |
 | 2026-07-15 | REQ-004 / TC-025〜029 | query(view-model)+ UI 完了(core 99.5% / 全体 98.0%、bundle 5.2KB gzip) | feat/REQ-004-ui |
@@ -43,6 +44,7 @@ Phase 2 — REQ-001〜006 完了(Must 全完了 + Should 全完了)。残りは 
 
 | 日付 | 決定 | 理由 / 代替案 |
 |---|---|---|
+| 2026-07-15 | 「最近の検索」への記録タイミング=結果リンクのクリック時 | 明示的な検索ボタンを設けず(リンクはライブ生成)、実際に検索を使った瞬間=リンク遷移を記録点に。キーストローク毎の保存を避け決定的。エントリは SearchState 全体を保存し再実行で選択も復元。同定は読み+言語(recent.ts) |
 | 2026-07-15 | ハッシュ形式は URLSearchParams(s/m/t/l/v)。既定値は省略し空状態=空ハッシュ | JSON+base64 より可読・堅牢(パーセントエンコードで丸ごと往復)。selected は v の反復で順序保持。書き戻しは replaceState(履歴を汚さない) |
 | 2026-07-15 | 復元時に selected は現存する variant value のみ採用 | 古い共有 URL や読み変更でバリアント集合が変わっても安全(存在しない選択は無視)。決定性を維持 |
 | 2026-07-15 | REQ-005 の「URL クエリ同期」を REQ-006 に委譲。本ループはフィルタ本体+セレクタ UI まで | URL 同期は codec(状態⇔ハッシュ)に依存。REQ-006 で言語・ONバリアント含め一括シリアライズする方が重複がない(AGENTS 9章の仮決定)。filterTargetsByLang は純粋・順序保存 |

@@ -174,3 +174,30 @@ ul.links a:hover {
   color: var(--muted);
   font-size: 0.9rem;
 }
+
+.recent-section {
+  margin-top: 2rem;
+}
+
+ul.recents {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+button.recent {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+button.recent:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
