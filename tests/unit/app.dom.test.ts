@@ -53,6 +53,21 @@ describe("REQ-004 mountApp 統合スモーク", () => {
     expect(after).toBe(before - 1);
   });
 
+  it("REQ-005 言語フィルタで ja 専用ターゲットが消え multi は残る", () => {
+    setInput(root, "sei", "なつめ");
+    setInput(root, "mei", "そうせき");
+    const namesAll = [...root.querySelectorAll("#links .links a")].map((a) => a.textContent);
+    expect(namesAll).toContain("国立国会図書館サーチ"); // ja 専用
+    const langEl = root.querySelector<HTMLSelectElement>("#lang");
+    if (!langEl) throw new Error("no #lang");
+    langEl.value = "en";
+    langEl.dispatchEvent(new Event("change", { bubbles: true }));
+    const namesEn = [...root.querySelectorAll("#links .links a")].map((a) => a.textContent);
+    expect(namesEn).not.toContain("国立国会図書館サーチ");
+    expect(namesEn).toContain("Wikidata"); // multi は残る
+    expect(namesEn).toContain("Amazon.com(米)"); // en
+  });
+
   it("変換不能な読みはエラー表示・空入力は選択促し", () => {
     setInput(root, "sei", "夏目");
     expect(root.querySelector(".errors")?.textContent).toContain("変換できません");

@@ -13,6 +13,21 @@ export const LABELS = {
   sei: "姓の読み(かな)",
   mei: "名の読み(かな)",
   title: "作品名の読み(かな)",
+  lang: "対象言語で絞り込み",
   copy: "選択中の表記を一括コピー",
   copied: "コピーしました",
 } as const;
+
+/** 言語フィルタの選択肢(value は core の LangFilter に一致)。REQ-005。 */
+export const LANG_OPTIONS: ReadonlyArray<{ value: string; label: string }> = [
+  { value: "all", label: "すべての言語" },
+  { value: "multi", label: "横断DB(multi)" },
+  { value: "en", label: "英語" },
+  { value: "fr", label: "フランス語" },
+  { value: "de", label: "ドイツ語" },
+  { value: "es", label: "スペイン語" },
+  { value: "it", label: "イタリア語" },
+  { value: "zh", label: "中国語" },
+  { value: "ko", label: "韓国語" },
+  { value: "ja", label: "日本語" },
+];

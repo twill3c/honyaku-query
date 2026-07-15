@@ -8,7 +8,7 @@ Phase 2 — 中核機能(REQ-001〜004)完了。動く UI が成立。次は **V
 
 ## Now(現在着手中)
 
-- なし(次ループで Vercel 初回デプロイ、または REQ-005 に着手)
+- なし(次ループで REQ-006 URL 共有 = codec + urlHash。REQ-005 の URL 同期もここで回収)
 
 ## Next Actions(次にやること・計画メモ)
 
@@ -16,12 +16,16 @@ Phase 2 — 中核機能(REQ-001〜004)完了。動く UI が成立。次は **V
 - [x] REQ-002: `src/core/variants.ts` — 1ループで完了(LOOP_LOG #4)
 - [x] REQ-003: `src/core/targets.ts` + `urlBuild.ts` — 1ループで完了(LOOP_LOG #5、TC-021〜024)
 - [x] REQ-004: `src/core/query.ts`(view-model)+ `src/ui/*` — 1ループで完了(LOOP_LOG #6、TC-025〜029)
-- [ ] Vercel 初回デプロイ → REQ-005(TC-031)/ 006(TC-041/042)/ 007(TC-051)
+- [x] REQ-005: `filterTargetsByLang` + 言語セレクタ — フィルタ完了(LOOP_LOG #7、TC-031)。URL 同期は REQ-006 へ
+- [ ] REQ-006 URL 共有(codec + urlHash、TC-041/042)+ REQ-005 の URL 同期回収
+- [ ] REQ-007 最近の検索(storage、TC-051)
+- [ ] Vercel 初回デプロイ(人間/運用ステップ、Blockers 参照)
 
 ## Done(完了ログ)
 
 | 日付 | REQ/TC | 内容 | PR |
 |---|---|---|---|
+| 2026-07-15 | REQ-005 / TC-031 | 言語フィルタ完了(core 99.5% / 全体 98.1%、65 tests)。URL 同期は REQ-006 へ | feat/REQ-005-lang-filter |
 | 2026-07-15 | REQ-004 / TC-025〜029 | query(view-model)+ UI 完了(core 99.5% / 全体 98.0%、bundle 5.2KB gzip) | feat/REQ-004-ui |
 | 2026-07-15 | REQ-003 / TC-021〜024 | targets + urlBuild 完了(core 99.4% / 全体 98.6%) | feat/REQ-003-targets-urlbuild |
 | 2026-07-03 | REQ-002 / TC-011〜016 | variants 完了(coverage 98.0%) | ローカルマージ fc37dcb |
@@ -31,12 +35,14 @@ Phase 2 — 中核機能(REQ-001〜004)完了。動く UI が成立。次は **V
 
 ## Blockers(障害・待ち)
 
+- **Vercel 初回デプロイ**はリモート未設定 + Vercel 認証なし(サンドボックス)で自動化不可。人間が (1) GitHub リモート作成・push (2) Vercel プロジェクト連携 を行う運用ステップ。ビルドは `pnpm build` → `dist/` 静的出力で確認済み(NFR-004 サーバレスなし)
 - 検索ターゲット12件の URL テンプレートは REQ-003 で**仮投入済み**(各サイト検索仕様に基づく)。人間の実ブラウザ確認 → 差し替え・verifiedAt 更新が残タスク(構造・エンコード方式・検証関数・鮮度判定は確定)。特に jpf-jltrans / bnf / dnb は要確認
 
 ## Decisions(決定ログ)
 
 | 日付 | 決定 | 理由 / 代替案 |
 |---|---|---|
+| 2026-07-15 | REQ-005 の「URL クエリ同期」を REQ-006 に委譲。本ループはフィルタ本体+セレクタ UI まで | URL 同期は codec(状態⇔ハッシュ)に依存。REQ-006 で言語・ONバリアント含め一括シリアライズする方が重複がない(AGENTS 9章の仮決定)。filterTargetsByLang は純粋・順序保存 |
 | 2026-07-15 | REQ-004 のロジックを `src/core/query.ts`(view-model)に集約し ui は薄く保つ | AGENTS 5章「ui はロジックを持たない」。純粋関数で node テスト可能に(TC-025〜029)。render は HTML 文字列を返す純関数、app は DOM/状態のみ |
 | 2026-07-15 | jsdom を devDependency 追加(UI 結線の統合テスト用) | NFR-003 はランタイムバンドル制約でありテスト専用 devDep は対象外。app.ts の DOM 結線を end-to-end 検証(免責表示・既定4件ON・トグル・エラー)。**発見**: テスト側の body 未クリアで重複 id → jsdom の getElementById 由来で querySelector が null。afterEach でクリアして解消(本番は #app へ1回マウントのみで無害) |
 | 2026-07-15 | 既定 ON は姓名+作品名を結合した優先度順の上位4件 | SPEC「上位4件 ON」を2リスト構成に適用。結合順(姓名→作品名)で決定的 |

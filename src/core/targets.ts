@@ -149,6 +149,22 @@ export function validateTargets(
   return errors;
 }
 
+/** 言語フィルタの選択値。"all" は絞り込みなし(全件)。 */
+export type LangFilter = TargetLang | "all";
+
+/**
+ * 対象言語でターゲットを絞る(TC-031、REQ-005)。
+ * "all" は全件。それ以外は「その言語に対応」または「multi(横断DB)」を残す(multi は常時表示)。
+ * 決定的・順序保存。
+ */
+export function filterTargetsByLang(
+  targets: readonly SearchTarget[],
+  lang: LangFilter,
+): SearchTarget[] {
+  if (lang === "all") return [...targets];
+  return targets.filter((t) => t.langs.includes(lang) || t.langs.includes("multi"));
+}
+
 const FRESH_DAYS = 365;
 const MS_PER_DAY = 86_400_000;
 
