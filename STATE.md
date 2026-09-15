@@ -25,6 +25,7 @@ Phase 4 — **全 REQ(001〜007)完了 + Vercel 初回デプロイ完了(本番�
 
 | 日付 | REQ/TC | 内容 | PR |
 |---|---|---|---|
+| 2026-09-15 | CI / TC-901 | CI が初回(2026-08-13)から 7 回中 7 回 install で落ちていたのを修正。pnpm/action-setup の `version: 9` を外し、package.json の `packageManager: pnpm@10.28.2` に版を一本化(core 99.18% / 全体 97.64%、90 tests)。アプリのコード・依存・lockfile は無変更 | fix/ci-pnpm-version |
 | 2026-07-15 | deploy | Vercel 初回デプロイ(vercel.json + `vercel --prod --yes`)。本番公開・HTTP 200・アセット/ヘッダ検証済み。URL: https://honyaku-query.vercel.app | chore/vercel-config |
 | 2026-07-15 | REQ-007 / TC-051 | recent + storage + ui(core 99.2% / 全体 97.6%、86 tests)。**全 REQ 完了** | feat/REQ-007-recent |
 | 2026-07-15 | REQ-006 / TC-041,042 | codec + urlHash + 復元/書き戻し配線(core 99.2% / 全体 97.6%、73 tests)。REQ-005 URL 同期も達成 | feat/REQ-006-url-share |
@@ -45,6 +46,7 @@ Phase 4 — **全 REQ(001〜007)完了 + Vercel 初回デプロイ完了(本番�
 
 | 日付 | 決定 | 理由 / 代替案 |
 |---|---|---|
+| 2026-09-15 | CI の pnpm は package.json の `packageManager` に従わせ、action に版を書かない。`pnpm-workspace.yaml` の `allowBuilds`(値が「set this to true or false」の仮置き)には触れない | 原因は CI(pnpm 9)と手元(pnpm 10.28.2)の版ずれ。pnpm 9 は packages の無い pnpm-workspace.yaml を拒否する。新しい clone で pnpm 9 は同じエラーを再現、10.28.2 は install / lint / coverage / build とも通過。lockfile は 9.0 形式で 10 でも読める。allowBuilds の仮置きは pnpm 10 では「未承認」として build script を飛ばすだけで手元と同じ挙動のため、承認の判断を変えない(代替案: packages を足して pnpm 9 に合わせる — 手元と CI の版ずれが残るので不採用) |
 | 2026-07-15 | 初回デプロイは Vercel CLI 直アップロード(`vercel --prod --yes`)。GitHub 連携は見送り | サンドボックスにリモート無しでも Vercel CLI が認証済み。CLI は作業ディレクトリを直接デプロイでき最短。git ベース CI/CD(push 自動デプロイ)は GitHub リポジトリ作成が前提のため任意の後続タスクに。vercel.json で framework=vite・静的のみ(NFR-004)を明示 |
 | 2026-07-15 | 改行コードを `.gitattributes`(`* text=auto eol=lf`)で LF に統一 | Windows(core.autocrlf=true)で作業ツリーが CRLF 化し `pnpm lint`(Biome=LF既定)が誤検知していた。ローカルは core.autocrlf=false + 既存ファイルを LF 正規化。CI/Linux は元々 LF blob で影響なし。全ループ共通の環境改善(chore ブランチ→main) |
 | 2026-07-15 | 「最近の検索」への記録タイミング=結果リンクのクリック時 | 明示的な検索ボタンを設けず(リンクはライブ生成)、実際に検索を使った瞬間=リンク遷移を記録点に。キーストローク毎の保存を避け決定的。エントリは SearchState 全体を保存し再実行で選択も復元。同定は読み+言語(recent.ts) |
