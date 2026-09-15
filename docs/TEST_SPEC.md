@@ -70,6 +70,12 @@
 |---|---|---|---|---|
 | TC-051 | unit | 直近10件・重複繰上げ・storage例外 | senbero-sim TC-061 系と同型 | 済 |
 
+### 運用: CI(REQ 外)
+
+| TC-ID | 階層 | 観点 | 期待結果 | 状態 |
+|---|---|---|---|---|
+| TC-901 | unit | CI の pnpm の版が手元と一致(実測 2026-09-15: CI が pnpm 9 固定で 7/7 失敗) | packageManager で版を固定 / pnpm/action-setup に version を書かない / packages の無い pnpm-workspace.yaml なら pnpm ≥ 10。検出器の対照(拾う・拾わない)つき | 済 |
+
 ## 3. フィクスチャ・テストデータ
 
 - 黄金テスト(TC-009)の実在名は歴史上の作家(著作権・存命性の問題がない範囲)を使用

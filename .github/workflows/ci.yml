@@ -15,10 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 版は package.json の packageManager(pnpm@10.28.2)に従う。ここに version を書かない
+      # (両方に書くと action が「Multiple versions of pnpm specified」で落ちる)。
+      # 実測 2026-09-15: ここを version: 9 に固定していたため、pnpm 10 書式の
+      # pnpm-workspace.yaml を pnpm 9 が拒否し、初回から 7 回中 7 回 install で落ちていた(TC-901)。
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Setup Node
         uses: actions/setup-node@v4

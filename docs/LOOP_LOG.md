@@ -39,6 +39,7 @@
 | 7 | feat/REQ-005-lang-filter | TC-031 | 1 | 受入の「URL 同期」を REQ-006 に委譲(codec 依存。AGENTS 9章の仮決定) | +約90 | 5 / 65 | test・lint・tsc・build・**coverage core 99.5% / 全体 98.1%** ✓ | 一発 Green。純粋関数 filterTargetsByLang(multi 常時表示)+ 言語セレクタ配線。DOM 統合テストで ja 専用除外・multi 残存を end-to-end 検証。REQ-005 フィルタ完了 |
 | 8 | feat/REQ-006-url-share | TC-041, 042 | 2 | なし(REQ-005 の URL 同期を回収) | +約200 | 8 / 73 | test・lint・tsc・build・**coverage core 99.2% / 全体 97.6%** ✓ | codec(純粋・URLSearchParams)は一発 Green。DOM 復元テストで**再び jsdom の重複 id 落とし穴**(2つ目の root を旧 root 残置のままマウント→ getElementById 由来で querySelector null)。旧 root 除去=リロード相当に修正。codec=core / urlHash=adapter / 復元=ui に3層分離。REQ-005/006 完了 |
 | 9 | feat/REQ-007-recent | TC-051 | 1 | なし | +約200 | 13 / 86 | test・lint・tsc・build・**coverage core 99.2% / 全体 97.6%** ✓ | 一発 Green。recent.ts(純粋: 重複繰上げ・上限10)/ storage.ts(localStorage・例外/破損/未対応を握り潰し)。storage 耐障害性は vi.stubGlobal で quota・不可環境を再現。DOM 統合で記録→永続→復元を end-to-end 検証。**全 REQ 完了** |
+| 10 | fix/ci-pnpm-version(REQ 外・CI) | TC-901 | 1 | なし(allowBuilds の仮置き値には触れない判断を Decisions に明示) | +84 −2 | 4 / 90 | test・lint・tsc・build・**coverage core 99.18% / 全体 97.64%** ✓ | **GitHub Actions の CI は初回(2026-08-13)から 7 回中 7 回 install で落ち、テストが一度も走っていなかった**(フリート CI 横断調査 2026-09-14 で発見)。原因は CI の pnpm 9 固定と手元 pnpm 10.28.2 の版ずれ(pnpm 9 は packages の無い pnpm-workspace.yaml を拒否)。新しい clone で pnpm 9 は同じエラーを再現(陽性対照)、10.28.2 は全工程通過。版の出どころを packageManager 一つにした。Red は 3 件(版未固定・action の version: 9・pnpm<10)で対照は緑、一発 Green。設定ファイルは `?raw` import で読み、@types/node を足さずに tsc を通した |
 
 ## 第1回実行のサマリ(2026-07-03)
 
